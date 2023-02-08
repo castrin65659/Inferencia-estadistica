@@ -1,0 +1,453 @@
+---
+title: "actividad 2"
+author: "Camilo Castro"
+date: "2022-09-06"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1. El Teorema del Límite Central es uno de los más importantes en la inferencia estadística y habla sobre la convergencia de los estimadores como la proporción muestral a la distribución normal. Algunos autores afirman que esta aproximación es bastante buena a partir del umbral n>30.
+
+
+a. Realice una simulación en la cual genere una población de N=1000 (Lote) y además que el porcentaje de individuos (plantas) enfermas sea del 50%.
+
+
+
+
+```{r}
+
+Lote_plantas=c(rep("enferma",500),rep("sana",500))
+
+
+```
+
+
+
+b. Genere una función que permita obtener una muestra aleatoria de la población y calcule el estimador de la proporción muestral para un tamaño de muestra dado n.
+
+```{r}
+
+#Se crea la función
+Muestra=function(n){
+  
+  Aleatoria_poblacion=sample(Lote_plantas,size=n)
+  
+  estimador=sum(Aleatoria_poblacion=="enferma")/n
+  
+  return(estimador)
+  
+}
+
+
+Muestra(10)  
+
+
+```
+
+c. Repita el escenario anterior (b) 500 veces y analice los resultados en cuanto al comportamiento de los 500 estimadores. ¿Qué tan simétricos son los datos?, ¿Son sesgados y qué pasa en cuanto a variabilidad?
+
+```{r}
+
+
+
+#Se grafica el estimador (pmuestras)
+
+pmuestras=sapply(rep(10,500),Muestra)
+hist(pmuestras)
+abline(v=0.5,col="red",lwd=4)
+
+
+```
+
+
+```{r}
+
+#Calculos sobre los estimadores 
+
+media_estimadores=mean(pmuestras)
+desviacion_estimadores=sd(pmuestras)
+desviacion_teorica=sqrt((0.5*0.5)/10) 
+media_poblacion=0.5
+data.frame(media_poblacion,media_estimadores,desviacion_teorica,desviacion_estimadores)
+
+
+```
+
+
+#En la grafica se puede observa que hay simetria a ambos lados del parametro, sin embargo, hay mayor numero de muestras por debajo de este. 
+
+#Como se puede apreciar en la tabla de resultados tanto la media de los estimadores como la desviación de los estimadores son cercanas a los valores teóricos lo cual muestra un menor sesgo.
+
+
+
+
+
+d. Realice los ejercicios completos b y c para tamaños de muestra n=5, 10, 15, 20, 30, 50, 60, 100, 200, 500. Y compare los resultados de los estimadores en cuanto a la normalidad. Investigue y utilice pruebas de bondad y ajuste (shapiro wilks) y métodos gráficos (grafico qq de normalidad).
+
+
+```{r}
+
+tamaño_muestra=c(5,10,15,20,30,50,60,100,200,500)
+comp_media_estimadores=1:10
+comp_desviacion_estimadores=1:10
+comp_Pvalue=1:10
+comp_desv_teorica=1:10
+
+
+for (i in 1:10){
+  
+  pmuestras=sapply(rep(tamaño_muestra[i],500),Muestra)
+  comp_media_estimadores[i]=mean(pmuestras)
+  comp_desviacion_estimadores[i]=sd(pmuestras)
+  comp_Pvalue[i]=(shapiro.test(pmuestras))[[2]]
+  comp_desv_teorica[i]=sqrt((0.5*0.5)/tamaño_muestra[i])
+}
+
+plot(comp_media_estimadores,type="b",main="Media de los estimadores",xlab="tamaño de muestra")
+abline(h=0.5,col="red",lwd=4)
+
+
+```
+
+
+```{r}
+
+plot(comp_desviacion_estimadores,type="b",main="Desviación de los estimadores",xlab="tamaño de muestra")
+lines(comp_desv_teorica,col="red",type="b")
+
+
+```
+
+
+```{r}
+
+plot(comp_Pvalue,type="b",main="P-Value del tamaño de muestra",xlab="tamaño de muestra")
+
+
+```
+
+
+```{r}
+
+hist(pmuestras)
+abline(v=0.5,col="red",lwd=4)
+
+
+```
+
+
+```{r}
+
+qqnorm(pmuestras)
+qqline(pmuestras,col="red",lwd=3)
+
+
+```
+
+#En la grafica de histograma se puede observa que se matiene la simetria a ambos lados del parametro como ocurria en el literal anterior. 
+
+#Como se puede apreciar en las graficas la media de los estimadores es cercana al valor teorico, mientras que la desviación de los estimadores tiende a cero. 
+
+
+
+
+e. Repita toda la simulación (puntos a – d) pero ahora con lotes con 10% y 90% de plantas enfermas. Concluya todo el ejercicio.
+
+
+
+```{r}
+
+Lote_plantas=c(rep("enferma",900),rep("sana",100))
+
+
+```
+
+
+```{r}
+
+tamaño_muestra=c(5,10,15,20,30,50,60,100,200,500)
+comp_media_estimadores=1:10
+comp_desviacion_estimadores=1:10
+comp_Pvalue=1:10
+comp_desv_teorica=1:10
+
+
+for (i in 1:10){
+  
+  pmuestras=sapply(rep(tamaño_muestra[i],500),Muestra)
+  comp_media_estimadores[i]=mean(pmuestras)
+  comp_desviacion_estimadores[i]=sd(pmuestras)
+  comp_Pvalue[i]=(shapiro.test(pmuestras))[[2]]
+  comp_desv_teorica[i]=sqrt((0.1*0.9)/tamaño_muestra[i])
+}
+
+plot(comp_media_estimadores,type="b",main="Media de los estimadores",xlab="tamaño de muestra")
+abline(h=0.9,col="red",lwd=4)
+
+
+```
+
+
+```{r}
+
+plot(comp_desviacion_estimadores,type="b",main="Desviación de los estimadores",xlab="tamaño de muestra")
+lines(comp_desv_teorica,col="red",type="b")
+
+
+```
+
+
+```{r}
+
+plot(comp_Pvalue,type="b",main="P-Value del tamaño de muestra",xlab="tamaño de muestra")
+
+
+```
+
+
+```{r}
+
+hist(pmuestras)
+abline(v=0.9,col="red",lwd=4)
+
+
+```
+
+
+```{r}
+
+qqnorm(pmuestras)
+qqline(pmuestras,col="red",lwd=3)
+
+
+```
+
+
+#Del ejercicio anterior podemos decir:
+
+ Cuando se presenta un incremento de la muestra:
+- La media de los estimadores se acerca al valor del parametro
+- La desviación de los estimadores se reduce
+- Al variar el porcentaje de plantas enfermas solo se modifica el parametro alrededor del cual convergen los resultados
+
+
+
+
+
+2. La comparación de tratamientos es una práctica fundamental en las ciencias agropecuarias y para esto a nivel estadístico se cuenta con algunas herramientas para apoyar el proceso de toma de decisiones y lograr concluir con algún grado de confianza que los resultados observados en una muestra son representativos y se pueden asociar a los tratamientos y no se deben únicamente al azar. Por medio una simulación validemos algunos de estos resultados.
+
+
+
+
+a. Suponga un escenario en el cual usted aplicó tratamientos diferentes a dos lotes y desea analizar si alguno de los dos presenta un mejor desempeño en el control de una plaga presente en ambos al momento inicial. Para ello utilizará como criterio de desempeño el tratamiento que menor % de plantas enfermas presente después de un
+tiempo de aplicación (es decir, si se presentan o no diferencias en las proporciones de enfermos P1 y P2). Realice una simulación en la cual genere dos poblaciones de N1=1000 (Lote1) y N2=1500 (Lote2), además asuma que el porcentaje de individuos (plantas) enfermas en ambos lotes sea la misma 10% (es decir, sin diferencias entre los tratamientos).
+
+
+
+```{r}
+
+Lote_1=c(rep("enferma",100),rep("sana",900))
+Lote_2=c(rep("enferma",150),rep("sana",1350))
+
+
+```
+
+
+
+b. Genere una función que permita obtener una muestra aleatoria de los lotes y calcule el estimador de la proporción muestral para cada lote (p1 y p2) para un tamaño de muestra dado n1=n2. Calcule la diferencia entre los estimadores p1-p2.
+
+
+```{r}
+
+Calulo=function(n){
+ n1=n
+ n2=n1
+  Muestra1=sample(Lote_1,size=n1)
+p1=sum(Muestra1=="enferma")/n1
+Muestra2=sample(Lote_2,size=n2)
+p2=sum(Muestra2=="enferma")/n2
+diferencia=(p1-p2)
+return(diferencia)
+}
+
+
+n1=60
+Calulo(n=n1) 
+
+
+```
+
+
+c. Repita el escenario anterior (b) 500 veces y analice los resultados en cuanto al comportamiento de los 500 estimadores (diferencias p1-p2). ¿Qué tan simétricos son los datos?, ¿Son siempre cero las diferencias?
+
+
+
+```{r}
+
+diferencia_p=sapply(rep(n1,500),Calulo)
+summary(diferencia_p)
+
+hist(diferencia_p)
+abline(v=0,col="red",lwd=4)
+
+
+```
+
+
+#De acuerdo a los resultados no siempre son cero las diferencias como se puede apreciar, tambien se percibe poca simetría. 
+
+
+d. Realice los puntos b y c para tamaños de muestra n1=n2=5, 10, 15, 20, 30, 50, 60, 100, 200, 500. Y compare los resultados de los estimadores (p1-p2) en cuanto a la normalidad. También analice el comportamiento de las diferencias y evalúe. ¿Considera que es más probable concluir que existen diferencias entre los tratamientos con muestras grandes que pequeñas, es decir, cuál considera usted que es el efecto del tamaño de muestra en el caso de la comparación de proporciones?
+
+
+```{r}
+
+tamaño_muestra=c(5,10,15,20,30,50,60,100,200,500)
+comp_media_estimadores=1:10
+comp_desviacion_estimadores=1:10
+comp_Pvalue=1:10
+comp_desv_teorica=1:10
+
+
+
+for (i in 1:10){
+  diferencia_p=sapply(rep(tamaño_muestra[i],500),Calulo) 
+  comp_media_estimadores[i]=mean(diferencia_p)
+  comp_desviacion_estimadores[i]=sd(diferencia_p)
+  comp_Pvalue[i]=(shapiro.test(diferencia_p))[[2]]
+  comp_desv_teorica[i]=sqrt((0.5*0.5)/tamaño_muestra[i])
+}
+
+plot(comp_media_estimadores,type="b",main="Media de los estimadores",xlab="tamaño de muestra")
+abline(h=0,col="red",lwd=4)
+
+
+```
+
+
+
+```{r}
+
+plot(comp_desviacion_estimadores,type="b",main="Desviación de los estimadores",xlab="tamaño de muestra")
+lines(comp_desv_teorica,col="red",type="b")
+
+
+```
+
+
+```{r}
+
+plot(comp_Pvalue,type="b",main="P-Value del tamaño de muestra",xlab="tamaño de muestra")
+
+
+```
+
+
+```{r}
+
+hist(diferencia_p)
+abline(v=0,col="red",lwd=4)
+
+
+```
+
+
+```{r}
+
+qqnorm(diferencia_p)
+qqline(diferencia_p,col="red",lwd=3)
+
+
+```
+
+# Se concluye que una muestra de mayor tamaño brinda mayor certeza al momento de afirmar que no existen diferncias entre ambas poblaciones con base en las muestras modeladas 
+
+
+
+e. Ahora realice nuevamente los puntos a-d bajo un escenario con dos lotes, pero de proporciones de enfermos diferentes (P1=0.1 y P2=0.15), es decir, el tratamiento del lote 1 si presentó un mejor desempeño reduciendo en un 5% el porcentaje de enfermos. Bajo este nuevo escenario compare la distribución de estas diferencias (p1-p2) con las observadas bajo igualdad de condiciones en los lotes. ¿Qué puede concluir? ¿Existen puntos en los cuales es posible que se observen diferencias de p1- p2 bajo ambos escenarios (escenario 1: sin diferencias entre P1 y P2, escenario 2: diferencia de 5%)?
+
+
+```{r}
+
+Lote_1=c(rep("enferma",100),rep("sana",900))
+Lote_2=c(rep("enferma",225),rep("sana",1275))
+
+
+```
+
+
+
+```{r}
+
+P1=sum(Lote_1=="enferma")/(sum(Lote_1=="sana")+sum(Lote_1=="enferma"))
+P2=sum(Lote_2=="enferma")/(sum(Lote_2=="sana")+sum(Lote_2=="enferma"))
+
+
+for (i in 1:10){
+  diferencia_p=sapply(rep(tamaño_muestra[i],500),Calulo) 
+  comp_media_estimadores[i]=mean(diferencia_p)
+  comp_desviacion_estimadores[i]=sd(diferencia_p)
+  comp_Pvalue[i]=(shapiro.test(diferencia_p))[[2]]
+  comp_desv_teorica[i]=sqrt((0.5*0.5)/tamaño_muestra[i])
+}
+
+plot(comp_media_estimadores,type="b")
+abline(h=-0.05,col="red",lwd=4)
+
+
+
+```
+
+```{r}
+
+plot(comp_desviacion_estimadores,type="b")
+lines(comp_desv_teorica,col="red",type="b")
+
+
+```
+
+
+
+```{r}
+
+plot(comp_Pvalue,type="b")
+
+
+```
+
+
+```{r}
+
+hist(diferencia_p)
+abline(v=-0.05,col="red",lwd=4)
+
+
+```
+
+
+```{r}
+
+qqnorm(diferencia_p)
+qqline(diferencia_p,col="red",lwd=3)
+
+
+```
+
+#Se establece que entre más grande sea el valor de n, la media se aproxima a -0.05 o -5%, y para valores n>=200 la distribución es normal de acuerdo al test de shapiro-wilks.
+Para p1-p2 en ambos escenarios la unica diferencia es que mientras la proporcion es igual, el resultado converge a cero, mientras que en el otro caso el resultado converge hacia la diferencia de los parametros.
+
+
+
+
+3. Con base a los artículos “Statistical Errors: P values, the gold standard of statistical validity, are not as reliable as many scientists assume” & “Statisticians issue warning on P values: Statement aims to halt missteps in the quest for certainty” escriba un resumen (máximo 2 páginas) sobre ambos artículos e incluya en este sus opiniones en cuanto al uso del valor p como criterio de decisión en inferencia estadística.
+
+
+El señor Matt Motyl realizó una investigación y posterior publicación acerca de personas con posición política, unos moderados en los cuales se puede percibir mejor los tonos de grises y otros con posición política extremista, se obtuvo un valor de P=0.01, lo cual resultó ser bastante adecuado y significativo, esta investigación fue reproducida posteriormente y arrojó un valor de P= 0.59 lo cual está bastante lejos del tradicional 0.05, todo esto genero gran revuelo ya que se trató de encontrar la razón de la problemática, llegando a concluir que el problema no se encontraba en los datos sino en la misma naturaleza del llamado valor P.
+El valor de P fue introducido por Ronald Fisher en el año de 1920, sin pretender que fuera una prueba definitiva sino de entregar unos resultados con base en evidencia significativa, por lo que cuanto más pequeño era el valor de P mayor sería la probabilidad de la hipótesis nula.     
+Muchas personas incluidos estadistas y no estadistas, han usado la propuesta del valor de P de Roland Fisher y la han mezclado con métodos de Jerzy Neyman para generar un mejor sistema, siempre buscando tener como referencia ese valor equivalente a 0.05 para P.
+Por otra parte, se ha popularizado el llamado P-hacking de Uri Simsohn el cual consiste en el uso indebido del análisis de datos para encontrar patrones en los que pueden presentarse como estadísticamente significativos, lo que aumenta y subestima drásticamente el riesgo de falsos positivos. Esto se hace realizando muchas pruebas estadísticas en los datos y solo informando aquellos que arrojan resultados significativos. Las pruebas convencionales de significación estadística se basan en la probabilidad de que surja un resultado particular si solo actuara el azar, y necesariamente aceptan algún riesgo de conclusiones erróneas de cierto tipo (rechazos erróneos de la hipótesis nula). Este nivel de riesgo se llama la importancia. Cuando se realizan un gran número de pruebas, algunas arrojan falsos resultados de este tipo; por lo tanto, el 5 % de las hipótesis elegidas al azar podría (erróneamente) informarse como estadísticamente significativa al 5 % de nivel de significación, el 1 % podría (erróneamente) informarse como estadísticamente significativa al 1 % de nivel de significación, y así sucesivamente, solo por casualidad.
+De acuerdo con la investigación, el valor de P se mantiene hasta el día de hoy según el planteamiento inicial y a pesar de las críticas y las diferentes posturas realizadas por diversas personas, siendo aplicado en investigaciones de diferente índole.  
+
